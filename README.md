@@ -29,11 +29,37 @@
 3. An Azure Function, to:
     * Listen for the webhook
     * Exercise the branch protection
-    * Create the ticket
+    * Create the GitHub Issue
 
 ## Demonstration
 
-## How to install
+## Installation
+1. Create Azure Function using Node.JS
+    a. Make note of default Function Keys secret and the URL
+
+1. Create or access your GitHub Organization
+1. Go to Settings for the Organization
+1. Go to Webhooks
+1. Add a Webhook
+    a. For payload URL, paste your Azure Function URL
+    a. For content type, select `application/json`
+    a. For secret, paste the Azure Function Keys default secret from the previous step
+    a. Select "Let me select individual events"; ensure that only the box for "Repositories" is selected
+    a. Ensure the box for "Active" is selected, to enable this webhook
+    a. Click Add Webhook button 
+
+1. In your GitHub profile settings, go to Developer Settings
+1. Create a personal access token
+
+1. At the top of the Azure Function `index.js` file, paste in your GitHub auth token, the username you want mentioned in GitHub Issues, and the Azure Function Keys secret:
+```
+// parameters you may change
+const octokit = new Octokit({ auth: '<gh-auth-token-here>'});         // GitHub auth token
+const default_branch = "main";                                  
+const name_to_mention = "<user-here>";                                // Name to mention in issue when created
+const hmac = Crypto.createHmac("sha1", "<azure-function-key-here>");  // Azure Function Keys secret
+```
+
 
 ## FAQ
 
