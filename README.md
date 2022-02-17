@@ -35,7 +35,7 @@
 
 ## Installation
 1. Create Azure Function using Node.JS
-    a. Make note of default Function Keys secret and the URL
+    1. Make note of default Function Keys secret and the URL
 
 1. Create or access your GitHub Organization
 1. Go to Settings for the Organization
