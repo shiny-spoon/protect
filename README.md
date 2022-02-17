@@ -41,12 +41,12 @@
 1. Go to Settings for the Organization
 1. Go to Webhooks
 1. Add a Webhook
-    a. For payload URL, paste your Azure Function URL
-    a. For content type, select `application/json`
-    a. For secret, paste the Azure Function Keys default secret from the previous step
-    a. Select "Let me select individual events"; ensure that only the box for "Repositories" is selected
-    a. Ensure the box for "Active" is selected, to enable this webhook
-    a. Click Add Webhook button 
+    1. For payload URL, paste your Azure Function URL
+    1. For content type, select `application/json`
+    1. For secret, paste the Azure Function Keys default secret from the previous step
+    1. Select "Let me select individual events"; ensure that only the box for "Repositories" is selected
+    1. Ensure the box for "Active" is selected, to enable this webhook
+    1. Click Add Webhook button 
 
 1. In your GitHub profile settings, go to Developer Settings
 1. Create a personal access token
