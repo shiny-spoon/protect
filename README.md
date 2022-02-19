@@ -27,6 +27,21 @@
 
 ## How the solution works
 
+```mermaid
+sequenceDiagram
+    participant GitHubWebhook
+    participant GitHubAPI
+    participant HttpListener
+    GitHubWebhook->>HttpListener: Webhook for repo actions
+    HttpListener->>HttpListener: Check Authentication
+    HttpListener->>GitHubAPI: Retrieve number of branches in repo
+    HttpListener->>GitHubAPI: Retrieve default branch
+    HttpListener->>GitHubAPI: Retrieve default branch protection status
+    HttpListener->>GitHubAPI: Apply default branch protection rule
+    HttpListener->>GitHubAPI: Create GitHub issue
+    HttpListener->>GitHubWebhook: Return HTTP Status OK for Webhook
+```
+
 When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP listener.
 
 In this implementation, the HTTP listener is a NodeJS application running in Azure, in a serverless fashion, through what's called an Azure Function. This is a very low cost (typically free) piece of compute which can trigger only when we need it, take care of interfacing with the GitHub API, and then wait for the next time it's required, without running continuously.
@@ -46,6 +61,7 @@ So, in the typical case for this scenario:
     * Listen for the webhook
     * Exercise the branch protection
     * Create the GitHub Issue
+
 
 ## Demonstration
 
