@@ -10,18 +10,10 @@ const { Octokit } = require("octokit");
 
 // Token for authenticating to GitHub
 const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault }); 
-
-// GitHub seems to have a bug in stating "master" as the default branch, in the data 
-// transmitted by the webhook, even if it's not "master" -- for example, if your default
-// branch is "main," GitHub may transmit that as "master" in the webhook
-//
-// So, use this to specify the default branch we want to protect
-//const default_branch =  process.env.DefaultBranchKeyVault;              
-
+// Azure Functions secret fot GitHub to authenticate with
+const azuresecret = process.env.AzureFunctionSecretKeyVault
 // Name to mention in issue when created
 const name_to_mention = process.env.NameToMentionKeyVault;              
-
-
 
 // =============================================================================
 
@@ -32,7 +24,7 @@ module.exports = async function (context, req) {
   const hookdata = req.body;
 
   // Prepare Azure Functions secret to compare with what is sent by GitHub webhook
-  const hmac = Crypto.createHmac("sha1", process.env.AzureFunctionSecretKeyVault);
+  const hmac = Crypto.createHmac("sha1", azuresecret);
   const signature = hmac.update(JSON.stringify(req.body)).digest("hex");
   const shaSignature = `sha1=${signature}`;
   const gitHubSignature = req.headers["x-hub-signature"];
