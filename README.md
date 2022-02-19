@@ -52,6 +52,7 @@ So, in the typical case for this scenario:
 ## Installation
 1. Create Azure Function using Node.JS -- you can follow the instructions [here](https://docs.microsoft.com/en-us/learn/modules/monitor-github-events-with-a-function-triggered-by-a-webhook/3-exercise-create-function-triggered-by-webhook)
 1. Then paste/overwrite the `index.js` and `function.json` files from this solution over the default ones you get from Azure
+1. TODO mention installing Octokit into the Azure Function environment
 
 1. Create or access your GitHub Organization
 1. Go to Settings for the Organization
