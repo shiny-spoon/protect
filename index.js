@@ -4,24 +4,22 @@ const Crypto = require("crypto");
 // Octokit is a library to help use the github api
 const { Octokit } = require("octokit");
 
-
 // =============================================================================
 // Change these parameters in the Azure Key Vault
 
 // Token for authenticating to GitHub
-const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault }); 
+const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault });
 // Azure Functions secret fot GitHub to authenticate with
-const azuresecret = process.env.AzureFunctionSecretKeyVault
+const azuresecret = process.env.AzureFunctionSecretKeyVault;
 // Name to mention in issue when created
-const name_to_mention = process.env.NameToMentionKeyVault;              
+const name_to_mention = process.env.NameToMentionKeyVault;
 
 // =============================================================================
-
 
 module.exports = async function (context, req) {
   context.log("JavaScript HTTP trigger function processed a request.");
 
-  const hookdata = req.body;
+  const webhookpayload = req.body;
 
   // Prepare Azure Functions secret to compare with what is sent by GitHub webhook
   const hmac = Crypto.createHmac("sha1", azuresecret);
@@ -29,59 +27,78 @@ module.exports = async function (context, req) {
   const shaSignature = `sha1=${signature}`;
   const gitHubSignature = req.headers["x-hub-signature"];
 
-
   // Confirm we're authenticating to GitHub properly
   const {
     data: { login },
   } = await octokit.rest.users.getAuthenticated();
   context.log("Authenticated to GitHub as %s", login);
 
-
-  // If GitHub webhook secret looks good
+  // If GitHub webhook secret looks good, then we can continue with our intent
   if (!shaSignature.localeCompare(gitHubSignature)) {
     num_branches = 0;
     default_branch = null;
+    default_branch_protected = null;
 
-
-    // Check default branch
-    await octokit.rest.repos
-    .get({
-      owner: hookdata.repository.owner.login,
-      repo: hookdata.repository.name,
-    })
-    .then(({ data, headers, status }) => { 
-      if(status == 200) {
-        context.log("Default Branch from API read: " + data.default_branch);
-        default_branch = data.default_branch;
-      }
-    });
-
-    // Determine if repo has a branch
+    // Determine if repo has any branches
     await octokit
       .request("GET /repos/{owner}/{repo}/branches", {
-        owner: hookdata.repository.owner.login,
-        repo: hookdata.repository.name,
+        owner: webhookpayload.repository.owner.login,
+        repo: webhookpayload.repository.name,
       })
-      .then(({ data, headers, status }) => { 
-        num_branches = data.length;     // This gets us the count of branches in the repo
+      .then(({ data, headers, status }) => {
+        num_branches = data.length; // This gets us the count of branches in the repo
         context.log("Branches: " + num_branches);
       });
 
+    // Check default branch (the name sent in the original webhook isn't always right)
+    if (num_branches > 0) {
+      await octokit.rest.repos
+        .get({
+          owner: webhookpayload.repository.owner.login,
+          repo: webhookpayload.repository.name,
+        })
+        .then(({ data, headers, status }) => {
+          if (status == 200) {
+            context.log("Default Branch from API read: " + data.default_branch);
+            default_branch = data.default_branch;
+          }
+        });
+    }
+
+    // Determine if default branch is already protected or unprotected
+    if (num_branches > 0) {
+      await octokit
+        .request("GET /repos/{owner}/{repo}/branches/{branch}", {
+          owner: webhookpayload.repository.owner.login,
+          repo: webhookpayload.repository.name,
+          branch: default_branch,
+        })
+        .then(({ data, headers, status }) => {
+          default_branch_protected = data.protected; // This gets us the count of branches in the repo
+          context.log("Protection: " + default_branch_protected);
+        });
+    }
+
     // If we determine that a repo was created and it has a branch, we'll assume we can go ahead and apply branch protection to the default branch
-    if (hookdata.action == "created" && num_branches > 0) {
+    //if (webhookpayload.action == "created" && num_branches > 0) {
+    if (
+      webhookpayload.action == "created" &&
+      num_branches > 0 &&
+      default_branch_protected == false
+    ) {
       context.res = {
         body:
           "Received notification. Action is " +
-          hookdata.action +
+          webhookpayload.action +
           ". " +
           "Repo is " +
-          hookdata.repository.name +
+          webhookpayload.repository.name +
           ". " +
           "Reported default branch is " +
-          hookdata.repository.default_branch +
+          webhookpayload.repository.default_branch +
           ". " +
           "Private is " +
-          hookdata.repository.private +
+          webhookpayload.repository.private +
           ".",
       };
 
@@ -90,13 +107,13 @@ module.exports = async function (context, req) {
         "Autoprotecting " +
           default_branch +
           " for repo " +
-          hookdata.repository.name
+          webhookpayload.repository.name
       );
       branchprotected = false;
       await octokit.rest.repos
         .updateBranchProtection({
-          owner: hookdata.repository.owner.login,
-          repo: hookdata.repository.name,
+          owner: webhookpayload.repository.owner.login,
+          repo: webhookpayload.repository.name,
           branch: default_branch,
           required_status_checks: null,
           enforce_admins: false,
@@ -114,20 +131,23 @@ module.exports = async function (context, req) {
       createdissue = false;
       if (branchprotected) {
         // create issue
-        context.log("Creating issue for repo " + hookdata.repository.name);
+        context.log(
+          "Creating issue for repo " + webhookpayload.repository.name
+        );
         await octokit.rest.issues
           .create({
-            owner: hookdata.repository.owner.login,
-            repo: hookdata.repository.name,
+            owner: webhookpayload.repository.owner.login,
+            repo: webhookpayload.repository.name,
             title:
-              "Protected default branch for repo " + hookdata.repository.name,
+              "Protected default branch for repo " +
+              webhookpayload.repository.name,
             body:
               "@" +
               name_to_mention +
               " Hello world. Repo " +
-              hookdata.repository.full_name +
+              webhookpayload.repository.full_name +
               " created. Created at " +
-              hookdata.repository.created_at +
+              webhookpayload.repository.created_at +
               ". Thank you.",
           })
           .then(({ data, headers, status }) => {
@@ -143,8 +163,10 @@ module.exports = async function (context, req) {
     else {
       if (num_branches == 0) {
         responsetext = "No branch present.";
+      } else if (default_branch_protected == true) {
+        responsetext = "Default branch already protected";
       } else {
-        responsetext = "Not a repo creation event.";
+        responsetext = "No action taken.";
       }
       context.res = {
         status: 200,
