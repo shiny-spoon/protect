@@ -1,17 +1,17 @@
-// Require github to authenticate to this Azure Functions listener
+// Require GitHub to authenticate to this listener
 const Crypto = require("crypto");
 
-// Octokit is a library to help use the github api
+// Octokit is a library to help use the GitHub api
 const { Octokit } = require("octokit");
 
 // =============================================================================
 // Change these parameters in the Azure Key Vault
 
-// Token for authenticating to GitHub
+// Token for this listener to authenticate to GitHub
 const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault });
-// Azure Functions secret fot GitHub to authenticate with
+// Token for GitHub to authenticate to this listener (from Azure Functions)
 const azuresecret = process.env.AzureFunctionSecretKeyVault;
-// Name to mention in issue when created
+// Name to mention when GitHub issue is created
 const name_to_mention = process.env.NameToMentionKeyVault;
 
 // =============================================================================
@@ -35,11 +35,13 @@ module.exports = async function (context, req) {
 
   // If GitHub webhook secret looks good, then we can continue with our intent
   if (!shaSignature.localeCompare(gitHubSignature)) {
+    // Set up variables to record the number of branches and default branch for the repo mentioned in the webhook
     num_branches = 0;
     default_branch = null;
     default_branch_protected = null;
+    protection_applied = false;
 
-    // Determine if repo has any branches
+    // Determine if the repo has any branches
     await octokit
       .request("GET /repos/{owner}/{repo}/branches", {
         owner: webhookpayload.repository.owner.login,
@@ -50,7 +52,7 @@ module.exports = async function (context, req) {
         context.log("Branches: " + num_branches);
       });
 
-    // Check default branch (the name sent in the original webhook isn't always right)
+    // Check default branch via the API (the name sent in the original webhook isn't always right)
     if (num_branches > 0) {
       await octokit.rest.repos
         .get({
@@ -79,29 +81,12 @@ module.exports = async function (context, req) {
         });
     }
 
-    // If we determine that a repo was created and it has a branch, we'll assume we can go ahead and apply branch protection to the default branch
-    //if (webhookpayload.action == "created" && num_branches > 0) {
+    // Proceed to apply branch protection to the default branch
     if (
       webhookpayload.action == "created" &&
       num_branches > 0 &&
       default_branch_protected == false
     ) {
-      context.res = {
-        body:
-          "Received notification. Action is " +
-          webhookpayload.action +
-          ". " +
-          "Repo is " +
-          webhookpayload.repository.name +
-          ". " +
-          "Reported default branch is " +
-          webhookpayload.repository.default_branch +
-          ". " +
-          "Private is " +
-          webhookpayload.repository.private +
-          ".",
-      };
-
       // apply branch protection
       context.log(
         "Autoprotecting " +
@@ -109,7 +94,7 @@ module.exports = async function (context, req) {
           " for repo " +
           webhookpayload.repository.name
       );
-      branchprotected = false;
+
       await octokit.rest.repos
         .updateBranchProtection({
           owner: webhookpayload.repository.owner.login,
@@ -123,13 +108,13 @@ module.exports = async function (context, req) {
         .then(({ data, headers, status }) => {
           if (status == 200) {
             // Status 200 OK
-            branchprotected = true;
+            protection_applied = true;
             context.log("Successfully protected branch.");
           }
         });
 
       createdissue = false;
-      if (branchprotected) {
+      if (protection_applied) {
         // create issue
         context.log(
           "Creating issue for repo " + webhookpayload.repository.name
@@ -158,6 +143,11 @@ module.exports = async function (context, req) {
             }
           });
       }
+      context.res = {
+        body:
+          "Applied protection for repo: " +
+          webhookpayload.repository.full_name
+      };
     }
     // No protection action to take
     else {
@@ -174,7 +164,7 @@ module.exports = async function (context, req) {
       };
     }
   }
-  // if github secret does NOT look good
+  // if GitHub secret does NOT look good
   else {
     context.res = {
       status: 401,
