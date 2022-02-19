@@ -1,33 +1,49 @@
-// require github to authenticate to this listener
+// Require github to authenticate to this Azure Functions listener
 const Crypto = require("crypto");
 
 // octokit is a library to help use the github api
 const { Octokit } = require("octokit");
 
-// parameters you may change
-const octokit = new Octokit({ auth: "<gh-auth-token-here>" }); // GitHub auth key
-const default_branch = "main"; // GitHub seems to have a bug in stating "master" as the default branch in the webhook name, even if it's not "master"
-const name_to_mention = "<user-here>"; // Name to mention in issue when created
-const hmac = Crypto.createHmac("sha1", "<azure-function-key-here>");
+
+// =============================================================================
+// Change these parameters in the Azure Key Vault
+
+// Token for authenticating to GitHub
+const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault }); 
+
+// GitHub seems to have a bug in stating "master" as the default branch in the webhook name, even if it's not "master"
+// So, use this to specify the default branch we want to protect
+const default_branch =  process.env.DefaultBranchKeyVault;              
+
+// Name to mention in issue when created
+const name_to_mention = process.env.NameToMentionKeyVault;              
+
+// Prepare Azure Functions secret to compare with what is sent by GitHub webhook
+const hmac = Crypto.createHmac("sha1", process.env.AzureFunctionSecretKeyVault);
+
+
+// =============================================================================
+
 
 module.exports = async function (context, req) {
   context.log("JavaScript HTTP trigger function processed a request.");
 
-  // confirm we're authenticating to GitHub properly
+
+  // Confirm we're authenticating to GitHub properly
   const {
     data: { login },
   } = await octokit.rest.users.getAuthenticated();
   context.log("Authenticated to GitHub as %s", login);
 
-  // establish our Azure Function Key in sha1 format
-  const signature = hmac.update(JSON.stringify(req.body)).digest("hex");
-  const shaSignature = `sha1=${signature}`;
-
-  // parse github secret
+  // Parse GitHub secret
   const gitHubSignature = req.headers["x-hub-signature"];
+  
+  // Store the body of the webhook message in a variable
   const hookdata = req.body;
 
-  // if github webhook secret looks good
+  // If GitHub webhook secret looks good...
+  const signature = hmac.update(JSON.stringify(hookdata)).digest("hex");
+  const shaSignature = `sha1=${signature}`;
   if (!shaSignature.localeCompare(gitHubSignature)) {
     num_branches = 0;
 
