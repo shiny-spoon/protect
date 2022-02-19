@@ -66,7 +66,7 @@ So, in the typical case for this scenario:
 ## Demonstration
 
 ## Installation
-1.Zip this repository and deploy to Azure Functions
+1. Zip this repository and deploy to Azure Functions
 
 1. Create or access your GitHub Organization
 1. Go to Settings for the Organization
