@@ -1,7 +1,7 @@
 // Require github to authenticate to this Azure Functions listener
 const Crypto = require("crypto");
 
-// octokit is a library to help use the github api
+// Octokit is a library to help use the github api
 const { Octokit } = require("octokit");
 
 
@@ -11,15 +11,16 @@ const { Octokit } = require("octokit");
 // Token for authenticating to GitHub
 const octokit = new Octokit({ auth: process.env.GitHubTokenKeyVault }); 
 
-// GitHub seems to have a bug in stating "master" as the default branch in the webhook name, even if it's not "master"
+// GitHub seems to have a bug in stating "master" as the default branch, in the data 
+// transmitted by the webhook, even if it's not "master" -- for example, if your default
+// branch is "main," GitHub may transmit that as "master" in the webhook
+//
 // So, use this to specify the default branch we want to protect
-const default_branch =  process.env.DefaultBranchKeyVault;              
+//const default_branch =  process.env.DefaultBranchKeyVault;              
 
 // Name to mention in issue when created
 const name_to_mention = process.env.NameToMentionKeyVault;              
 
-// Prepare Azure Functions secret to compare with what is sent by GitHub webhook
-const hmac = Crypto.createHmac("sha1", process.env.AzureFunctionSecretKeyVault);
 
 
 // =============================================================================
@@ -28,6 +29,14 @@ const hmac = Crypto.createHmac("sha1", process.env.AzureFunctionSecretKeyVault);
 module.exports = async function (context, req) {
   context.log("JavaScript HTTP trigger function processed a request.");
 
+  const hookdata = req.body;
+
+  // Prepare Azure Functions secret to compare with what is sent by GitHub webhook
+  const hmac = Crypto.createHmac("sha1", process.env.AzureFunctionSecretKeyVault);
+  const signature = hmac.update(JSON.stringify(req.body)).digest("hex");
+  const shaSignature = `sha1=${signature}`;
+  const gitHubSignature = req.headers["x-hub-signature"];
+
 
   // Confirm we're authenticating to GitHub properly
   const {
@@ -35,27 +44,34 @@ module.exports = async function (context, req) {
   } = await octokit.rest.users.getAuthenticated();
   context.log("Authenticated to GitHub as %s", login);
 
-  // Parse GitHub secret
-  const gitHubSignature = req.headers["x-hub-signature"];
-  
-  // Store the body of the webhook message in a variable
-  const hookdata = req.body;
 
-  // If GitHub webhook secret looks good...
-  const signature = hmac.update(JSON.stringify(hookdata)).digest("hex");
-  const shaSignature = `sha1=${signature}`;
+  // If GitHub webhook secret looks good
   if (!shaSignature.localeCompare(gitHubSignature)) {
     num_branches = 0;
+    default_branch = null;
+
+
+    // Check default branch
+    await octokit.rest.repos
+    .get({
+      owner: hookdata.repository.owner.login,
+      repo: hookdata.repository.name,
+    })
+    .then(({ data, headers, status }) => { 
+      if(status == 200) {
+        context.log("Default Branch from API read: " + data.default_branch);
+        default_branch = data.default_branch;
+      }
+    });
 
     // Determine if repo has a branch
-    // If the repo doesn't have a branch, we won't apply branch protection
     await octokit
       .request("GET /repos/{owner}/{repo}/branches", {
         owner: hookdata.repository.owner.login,
         repo: hookdata.repository.name,
       })
-      .then(({ data, headers, status }) => {
-        num_branches = data.length;
+      .then(({ data, headers, status }) => { 
+        num_branches = data.length;     // This gets us the count of branches in the repo
         context.log("Branches: " + num_branches);
       });
 
