@@ -1,8 +1,9 @@
-# Solution Notes
+# Protect Branches
 
 ## Challenge
 
-* We want to ensure code reviews are being done to code before it is added to a repository.
+* We want to ensure code reviews for code added to our repositories.
+* We want to accomodate this need at scale, as new respositories are created. 
 
 ## Assumptions
 
@@ -20,7 +21,22 @@
   * Documenting the creation of the repo
   * Confirming the protection rule(s) applied
 
+## Limitations of this solution
+* This solution does not accomodate existing repositories. It is built to handle repositories that are newly created, with a default branch.
+* This solution does not accomodate repositories that are not initialized with a default branch.
+
 ## How the solution works
+
+When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP listener.
+
+In this implementation, the HTTP listener is a NodeJS application running in Azure, in a serverless fashion, through what's called an Azure Function. This is a very low cost (typically free) piece of compute which can trigger only when we need it, take care of interfacing with the GitHub API, and then wait for the next time it's required, without running continuously.
+
+So, in the typical case for this scenario:
+  1. A user or administrator creates a GitHub repo within our GitHub organization -- this can be done via the GUI or programmatically -- and initializes the repository with a README file or other first commit.
+  1. GitHub sends a webhook to our Azure Function with the repository creation metadata.
+  1. The Azure Function uses the GitHub API to determine the default branch for the repo and applies branch protection rules to that branch.
+  1. The Azure Function then further uses the GitHub API to create an Issue in the repo, describing the branch protection which was applied.
+  1. The Azure Function then returns a Success HTTP status code to GitHub.
 
 ### Components
 
@@ -34,8 +50,8 @@
 ## Demonstration
 
 ## Installation
-1. Create Azure Function using Node.JS
-    1. Make note of default Function Keys secret and the URL
+1. Create Azure Function using Node.JS -- you can follow the instructions [here](https://docs.microsoft.com/en-us/learn/modules/monitor-github-events-with-a-function-triggered-by-a-webhook/3-exercise-create-function-triggered-by-webhook)
+1. Then paste/overwrite the `index.js` and `function.json` files from this solution over the default ones you get from Azure
 
 1. Create or access your GitHub Organization
 1. Go to Settings for the Organization
@@ -51,14 +67,7 @@
 1. In your GitHub profile settings, go to Developer Settings
 1. Create a personal access token
 
-1. At the top of the Azure Function `index.js` file, paste in your GitHub auth token, the username you want mentioned in GitHub Issues, and the Azure Function Keys secret:
-```
-// parameters you may change
-const octokit = new Octokit({ auth: '<gh-auth-token-here>'});         // GitHub auth token
-const default_branch = "main";                                  
-const name_to_mention = "<user-here>";                                // Name to mention in issue when created
-const hmac = Crypto.createHmac("sha1", "<azure-function-key-here>");  // Azure Function Keys secret
-```
+1. TODO talk about Azure Key Vault here...
 
 
 ## FAQ
