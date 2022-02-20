@@ -31,8 +31,8 @@
 sequenceDiagram
     participant GitHub
     participant WebhookListener
-    GitHub->>HttpListener: Webhook for repo actions
-    WebhookListener->>WebhookListener: Authenticate Webhook
+    GitHub->>WebhookListener: Send webhook reporting a repo action
+    WebhookListener->>WebhookListener: Authenticate Webhook Request
     WebhookListener->>GitHub: (GitHub REST API) Retrieve number of branches in repo
     WebhookListener->>GitHub: (GitHub REST API) Retrieve default branch name
     WebhookListener->>GitHub: (GitHub REST API) Retrieve default branch protection status
