@@ -16,10 +16,10 @@
 
 * When a new repo is created:
   * The default branch is protected
-* An issue is automatically created in the repo
-  * Including a @mention
-  * Documenting the creation of the repo
-  * Confirming the protection rule(s) applied
+  * An issue is automatically created in the repo
+    * Including a @mention
+    * Documenting the creation of the repo
+    * Confirming the protection rule(s) applied
 
 ## Limitations of this solution
 * This solution does not accomodate existing repositories. It is built to handle repositories that are newly created, with a default branch.
@@ -29,29 +29,32 @@
 
 ```mermaid
 sequenceDiagram
-    participant GitHubWebhook
-    participant GitHubAPI
-    participant HttpListener
-    GitHubWebhook->>HttpListener: Webhook for repo actions
-    HttpListener->>HttpListener: Check Authentication
-    HttpListener->>GitHubAPI: Retrieve number of branches in repo
-    HttpListener->>GitHubAPI: Retrieve default branch
-    HttpListener->>GitHubAPI: Retrieve default branch protection status
-    HttpListener->>GitHubAPI: Apply default branch protection rule
-    HttpListener->>GitHubAPI: Create GitHub issue
-    HttpListener->>GitHubWebhook: Return HTTP Status OK for Webhook
+    participant GitHub
+    participant WebhookListener
+    GitHub->>HttpListener: Webhook for repo actions
+    WebhookListener->>WebhookListener: Authenticate Webhook
+    WebhookListener->>GitHub: (GitHub REST API) Retrieve number of branches in repo
+    WebhookListener->>GitHub: (GitHub REST API) Retrieve default branch name
+    WebhookListener->>GitHub: (GitHub REST API) Retrieve default branch protection status
+    WebhookListener->>GitHub: (GitHub REST API) Apply default branch protection rule
+    WebhookListener->>GitHub: (GitHub REST API) Create GitHub issue
+    WebhookListener->>GitHub: Return HTTP Status OK for Webhook
 ```
 
-When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP listener.
+When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP Listener, or Webhook Listener.
 
-In this implementation, the HTTP listener is a NodeJS application running in Azure, in a serverless fashion, through what's called an Azure Function. This is a very low cost (typically free) piece of compute which can trigger only when we need it, take care of interfacing with the GitHub API, and then wait for the next time it's required, without running continuously.
+In this implementation, the Webhook Listener is a NodeJS application.
+
+ To simplify operations, this implementation is running in Azure, in a serverless fashion, through what's called an Azure Function. This is a very low cost (typically free) piece of compute which can trigger only when we need it, take care of interfacing with the GitHub API, and then wait for the next time it's required, without running continuously.
+
+ _Alternatively, this NodeJS application could be run with AWS Lambda or other serverless platforms. It could also be run on a traditional server._
 
 So, in the typical case for this scenario:
-  1. A user or administrator creates a GitHub repo within our GitHub organization -- this can be done via the GUI or programmatically -- and initializes the repository with a README file or other first commit.
-  1. GitHub sends a webhook to our Azure Function with the repository creation metadata.
-  1. The Azure Function uses the GitHub API to determine the default branch for the repo and applies branch protection rules to that branch.
-  1. The Azure Function then further uses the GitHub API to create an Issue in the repo, describing the branch protection which was applied.
-  1. The Azure Function then returns a Success HTTP status code to GitHub.
+  1. A user or administrator creates a GitHub repo within the GitHub Organization -- this can be done via the GUI or programmatically -- and initializes the repository with a README file or other first commit.
+  1. GitHub sends a webhook to our Webhook Listener URL with the repository creation metadata.
+  1. The Webhook Listener uses the GitHub API to determine the default branch for the repo and applies branch protection rules to that branch.
+  1. The Webhook Listener then further uses the GitHub API to create an Issue in the repo, describing the branch protection which was applied.
+  1. The Webhook Listener then returns a Success HTTP status code to GitHub.
 
 ### Components
 
