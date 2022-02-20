@@ -145,8 +145,7 @@ module.exports = async function (context, req) {
       }
       context.res = {
         body:
-          "Applied protection for repo: " +
-          webhookpayload.repository.full_name
+          "Applied protection for repo: " + webhookpayload.repository.full_name,
       };
     }
     // No protection action to take
