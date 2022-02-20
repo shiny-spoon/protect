@@ -66,8 +66,11 @@ So, in the typical case for this scenario:
 ## Demonstration
 
 ## Installation
+
+### Deploy the Webhook Listener to Azure Functions
 1. Download the `.zip` of this repository and deploy to Azure Functions
 
+### Set up the Webhook in Your GitHub Organization
 1. Create or access your GitHub Organization
 1. Go to Settings for the Organization
 1. Go to Webhooks
@@ -79,10 +82,15 @@ So, in the typical case for this scenario:
     1. Ensure the box for "Active" is selected, to enable this webhook
     1. Click Add Webhook button 
 
+### Get a GitHub Access Token
 1. In your GitHub profile settings, go to Developer Settings
 1. Create a personal access token
 
-1. TODO talk about Azure Key Vault here...
+### Set Secrets for Azure Function to Use
+1. Use Azure Key Vault to set up the following three secrets:
+    1. `GitHubTokenKeyVault` - this is the GitHub Personal Access Token you created
+    1. `AzureFunctionSecretKeyVault` - this is the default Azure Function Function Key secret for your created Azure Function
+    1. `NameToMentionKeyVault` - this is the GitHub username you want mentioned in the Issues created by this app
 
 
 ## FAQ
