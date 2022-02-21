@@ -71,7 +71,25 @@ So, in the typical case for this scenario:
 ## Installation
 
 ### Deploy the Webhook Listener to Azure Functions
-1. Download the `.zip` of this repository and deploy to Azure Functions
+
+_The following assume you will host the app with Azure Functions and want to deploy through the Web UI_
+
+1. Create an Azure Function
+    1. From the Azure Portal, create a new Azure Function App
+    1. Give it a name and select `Node.js` as the runtime stack
+    1. Once the Function App resource is created, select "Create a function"
+    1. From the available templates, select "HTTP trigger" and create
+1. Copy the code to your Azure Function
+    1. Once that is ready, go to the "Code + Test" feature
+    1. Copy-and-paste the `webhooktrigger/index.js` file contents from this repository over the index.js file shown to you in the Azure Portal. Save.
+1. Install the octokit Node.js package 
+    1. Go to the Function App Overview page in the UI
+    1. Go to Advanced Tools, under Development Tools
+    1. Go to the Debug Console > PowerShell
+    1. Execute command: `cd site`
+    1. Execute command: `cd wwwroot`
+    1. Execute command: `npm install octokit`
+ 1. Use "Get function URL" to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
 
 ### Set up the Webhook in Your GitHub Organization
 1. Create or access your GitHub Organization
@@ -94,6 +112,14 @@ So, in the typical case for this scenario:
     1. `GitHubTokenKeyVault` - this is the GitHub Personal Access Token you created
     1. `AzureFunctionSecretKeyVault` - this is the default Azure Function Function Key secret for your created Azure Function
     1. `NameToMentionKeyVault` - this is the GitHub username you want mentioned in the Issues created by this app
+1. If you don't want to use Azure Key Vault and you're only using this for testing, you can set the three values as environment variables, either in the system or at the top of the `index.js` file, like this, and they will be picked up and used by the code in the same way as if you had configured the Key Vault:
+
+```
+process.env.GitHubTokenKeyVault = 'my-github-secret';
+process.env.AzureFunctionSecretKeyVault = 'my-azure-secret';
+process.env.NameToMentionKeyVault = 'my-user';
+```
+    
 
 
 ## FAQ
