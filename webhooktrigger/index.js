@@ -76,7 +76,7 @@ module.exports = async function (context, req) {
           branch: default_branch,
         })
         .then(({ data, headers, status }) => {
-          default_branch_protected = data.protected; // This gets us the count of branches in the repo
+          default_branch_protected = data.protected; // This gets us the protection status of the branch (true/false)
           context.log("Protection: " + default_branch_protected);
         });
     }
