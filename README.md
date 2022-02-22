@@ -43,11 +43,11 @@ sequenceDiagram
 
 When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP Listener, or Webhook Listener.
 
-In this implementation, the Webhook Listener is a NodeJS application.
+In this implementation, the Webhook Listener is a Node.js application.
 
  To simplify operations, this implementation is running in Azure, in a serverless fashion, through what's called an Azure Function. This is a very low cost (typically free) piece of compute which can trigger only when we need it, take care of interfacing with the GitHub API, and then wait for the next time it's required, without running continuously.
 
- _Alternatively, this NodeJS application could be run with AWS Lambda or other serverless platforms. It could also be run on a traditional server._
+ _Alternatively, this Node.js application could be run with AWS Lambda or other serverless platforms. It could also be run on a traditional server._
 
 So, in the typical case for this scenario:
   1. A user or administrator creates a GitHub repo within the GitHub Organization -- this can be done via the GUI or programmatically -- and initializes the repository with a README file or other first commit.

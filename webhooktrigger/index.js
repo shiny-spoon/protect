@@ -129,9 +129,9 @@ module.exports = async function (context, req) {
             body:
               "@" +
               name_to_mention +
-              " Hello world. Repo " +
+              " FYI:  Automatically protected repo - " +
               webhookpayload.repository.full_name +
-              " created. Created at " +
+              " Repo was created at " +
               webhookpayload.repository.created_at +
               ". Thank you.",
           })
@@ -163,7 +163,7 @@ module.exports = async function (context, req) {
       };
     }
   }
-  // if GitHub secret does NOT look good
+  // If GitHub secret does NOT look good
   else {
     context.res = {
       status: 401,
