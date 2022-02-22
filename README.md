@@ -68,11 +68,21 @@ So, in the typical case for this scenario:
 
 ## Demonstration
 
+1. Scenario:  Create a new repository and initialize with default branch
+    * Protects branch
+    * Creates issue
+1. Scenario:  Create a new repository and don't initialize 
+    * No action; proper webhook response
+1. Scenario:  Edit a repository description 
+    * No action; proper webhook response
+
 ## Installation
 
 ### Deploy the Webhook Listener to Azure Functions
 
 _The following assume you will host the app with Azure Functions and want to deploy through the Web UI_
+
+#### Through the Azure Portal UI
 
 1. Create an Azure Function
     1. From the Azure Portal, create a new Azure Function App
@@ -89,7 +99,12 @@ _The following assume you will host the app with Azure Functions and want to dep
     1. Execute command: `cd site`
     1. Execute command: `cd wwwroot`
     1. Execute command: `npm install octokit`
- 1. Use "Get function URL" to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
+ 1. Use "Get function URL" button to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
+ 1. Go to Function Keys and copy the default secret, which you'll also need in the next set of steps
+
+
+#### With a Deployment Template
+// TODO
 
 ### Set up the Webhook in Your GitHub Organization
 1. Create or access your GitHub Organization
