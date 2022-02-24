@@ -96,14 +96,15 @@ module.exports = async function (context, req) {
       );
 
       await octokit.rest.repos
-        .updateBranchProtection({
+        .updateBranchProtection({ // require pull requests for merges to default; this ensures code review
           owner: webhookpayload.repository.owner.login,
           repo: webhookpayload.repository.name,
           branch: default_branch,
           required_status_checks: null,
-          enforce_admins: false,
-          required_pull_request_reviews: null,
-          restrictions: { teams: [], users: [] }, // This rule means no one is allowed to push to default
+          enforce_admins: true,
+          required_pull_request_reviews: true,
+          required_pull_request_reviews: { required_approving_review_count: 1, dismiss_stale_reviews: true },
+          restrictions: null,
         })
         .then(({ data, headers, status }) => {
           if (status == 200) {
@@ -129,11 +130,14 @@ module.exports = async function (context, req) {
             body:
               "@" +
               name_to_mention +
-              " FYI:  Automatically protected repo - " +
+              "\n\n FYI:  Automatically protected repo: " +
               webhookpayload.repository.full_name +
-              " Repo was created at " +
+              "\n\n All commits must be made to a non-protected branch and submitted via a pull request before they can be merged into the default branch." +
+              "\n\n At least one review approval is required before merge to default branch can occur." +
+              "\n\n New reviewable commits pushed to a default branch will dismiss existing pull request review approvals." +
+              "\n\nThis repo was created at " +
               webhookpayload.repository.created_at +
-              ". Thank you.",
+              ". \n\nThank you.",
           })
           .then(({ data, headers, status }) => {
             if (status == 201) {
