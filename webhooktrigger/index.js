@@ -95,8 +95,10 @@ module.exports = async function (context, req) {
           webhookpayload.repository.name
       );
 
+
+      // require pull requests for merges to default; this ensures code review
       await octokit.rest.repos
-        .updateBranchProtection({ // require pull requests for merges to default; this ensures code review
+        .updateBranchProtection({ 
           owner: webhookpayload.repository.owner.login,
           repo: webhookpayload.repository.name,
           branch: default_branch,
