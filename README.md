@@ -100,11 +100,8 @@ _The following assume you will host the app with Azure Functions and want to dep
     1. Execute command: `cd wwwroot`
     1. Execute command: `npm install octokit`
  1. Use "Get function URL" button to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
- 1. Go to Function Keys and copy the default secret, which you'll also need in the next set of steps
+ 1. Go to Function Keys and copy the default secret (we'll call this our Azure Secret), which you'll also need in the next set of steps
 
-
-#### With a Deployment Template
-// TODO
 
 ### Set up the Webhook in Your GitHub Organization
 1. Create or access your GitHub Organization
@@ -113,7 +110,7 @@ _The following assume you will host the app with Azure Functions and want to dep
 1. Add a Webhook
     1. For payload URL, paste your Azure Function URL
     1. For content type, select `application/json`
-    1. For secret, paste the Azure Function Keys default secret from the previous step
+    1. For secret, paste the Azure Secret from the previous step
     1. Select "Let me select individual events"; ensure that only the box for "Repositories" is selected
     1. Ensure the box for "Active" is selected, to enable this webhook
     1. Click Add Webhook button 
@@ -134,12 +131,14 @@ process.env.GitHubTokenKeyVault = 'my-github-secret';
 process.env.AzureFunctionSecretKeyVault = 'my-azure-secret';
 process.env.NameToMentionKeyVault = 'my-user';
 ```
+
+
+
+## Room for Enhancements
+1. Deploy via Infrastructure-as-Code
+1. Push a default branch when the repo is not initialized on creation
+1. Configure as a GitHub App with rotating authentication
     
-
-
-## FAQ
-
-1. What does it mean for a branch to be protected?
 
 ## References
  
