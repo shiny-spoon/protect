@@ -33,8 +33,8 @@ module.exports = async function (context, req) {
   } = await octokit.rest.users.getAuthenticated();
   context.log("Authenticated to GitHub as %s", login);
 
-  // If GitHub webhook secret looks good, then we can continue with our intent
-  if (!shaSignature.localeCompare(gitHubSignature)) {
+  // If GitHub webhook secret looks good and this is a repo creation event, then we can continue with our intent
+  if (!shaSignature.localeCompare(gitHubSignature) && webhookpayload.action == "created") {
     // Set up variables to record the number of branches and default branch for the repo mentioned in the webhook
     num_branches = 0;
     default_branch = null;
@@ -83,7 +83,6 @@ module.exports = async function (context, req) {
 
     // Proceed to apply branch protection to the default branch
     if (
-      webhookpayload.action == "created" &&
       num_branches > 0 &&
       default_branch_protected == false
     ) {
@@ -95,10 +94,9 @@ module.exports = async function (context, req) {
           webhookpayload.repository.name
       );
 
-
       // Require pull requests for all merges to default branch; this ensures code review
       await octokit.rest.repos
-        .updateBranchProtection({ 
+        .updateBranchProtection({
           owner: webhookpayload.repository.owner.login,
           repo: webhookpayload.repository.name,
           branch: default_branch,
@@ -169,11 +167,19 @@ module.exports = async function (context, req) {
       };
     }
   }
-  // If GitHub secret does NOT look good
+  // If GitHub secret does NOT look good or this is not a repo creation event
   else {
-    context.res = {
-      status: 401,
-      body: "Signatures don't match",
-    };
+      if (webhookpayload.action != "created") {
+        context.res = {
+        status: 200,
+        body: "Not a repo creation event. No action.",
+        };
+      } else {
+        context.res = {
+        status: 401,
+        body: "Signatures don't match",
+        };
+      }
+
   }
 };
