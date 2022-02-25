@@ -8,6 +8,9 @@
 ## Assumptions
 
 * New repos are created frequently and need to automatically inherit agreed policies.
+* Our preferred protected branch rule is to:
+    * Require a pull request before merging to the default branch.
+    * Require the pull request to be approved by at least one reviewer.
 * New repos will be initialized with a README at creation.
 * We aren't worried about protecting the default branch for repos which are not initialized with a default branch at creation.
 * We are using a single GitHub Organization.
