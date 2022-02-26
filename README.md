@@ -81,9 +81,18 @@ _The following assume you will host the app with Azure Functions and want to dep
     1. Give it a name and select `Node.js` as the runtime stack
     1. Once the Function App resource is created, select "Create a function"
     1. From the available templates, select "HTTP trigger" and create
+
+![create-function-app](https://user-images.githubusercontent.com/11546190/155858500-7d7f7682-9211-41ec-b052-398aae13d519.png)
+
+
+
 1. Copy the code to your Azure Function
     1. Once that is ready, go to the "Code + Test" feature
     1. Copy-and-paste the `webhooktrigger/index.js` file contents from this repository over the index.js file shown to you in the Azure Portal. Save.
+
+![code-and-test-screen](https://user-images.githubusercontent.com/11546190/155858498-a6355f2f-454d-4114-95b4-ea3c1e93d6bc.png)
+
+
 1. Install the octokit Node.js package 
     1. Go to the Function App Overview page in the UI
     1. Go to Advanced Tools, under Development Tools
@@ -91,8 +100,12 @@ _The following assume you will host the app with Azure Functions and want to dep
     1. Execute command: `cd site`
     1. Execute command: `cd wwwroot`
     1. Execute command: `npm install octokit`
- 1. Use "Get function URL" button to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
- 1. Go to Function Keys and copy the default secret (we'll call this our Azure Secret), which you'll also need in the next set of steps
+
+
+1. Use "Get function URL" button to retrieve the function's endpoint; you'll need this to configure the Webhook in the next set of steps
+
+
+1. Go to Function Keys and copy the default secret (we'll call this our Azure Secret), which you'll also need in the next set of steps
 
 
 ### Set up the Webhook in Your GitHub Organization
@@ -127,6 +140,7 @@ process.env.NameToMentionKeyVault = 'my-user';
 ## Monitoring
 
 You can view the logs in the Azure Functions "Monitor" portal
+
 ![image](https://user-images.githubusercontent.com/11546190/155858440-68771a70-dc8f-40d3-824f-4b9fa62a0e2c.png)
 
 
