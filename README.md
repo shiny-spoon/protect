@@ -104,7 +104,8 @@ _The following assume you will host the app with Azure Functions and want to dep
 1. Go to Settings for the Organization
     * ![gh-org-settings-button](https://user-images.githubusercontent.com/11546190/155858608-d10e137d-9986-4013-99df-a5acb9320f3f.png)
 1. Go to Webhooks
-1. Add a Webhook
+3. Add a Webhook
+    * ![image](https://user-images.githubusercontent.com/11546190/155858663-e37c7d34-3829-4fa1-ba82-aa0ccc61e807.png)
     1. For payload URL, paste your Azure Function URL
     1. For content type, select `application/json`
     1. For secret, paste the Azure Secret from the previous step
