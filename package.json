@@ -1,0 +1,15 @@
+{
+  "name": "protectbranches",
+  "version": "1.0.0",
+  "description": "automatically protect github default branches on initialization",
+  "main": "index.js",
+  "dependencies": {
+    "octokit": "^1.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
