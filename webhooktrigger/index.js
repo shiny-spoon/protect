@@ -141,7 +141,7 @@ module.exports = async function (context, req) {
           })
           .then(({ data, headers, status }) => {
             if (status == 201) {
-              // Status 201 Created
+              // HTTP Status 201 Created
               createdissue = true;
               context.log("Successfully created issue.");
             }
