@@ -68,17 +68,6 @@ So, in the typical case for this scenario:
     * Exercise the branch protection
     * Create the GitHub Issue
 
-
-## Demonstration
-
-1. Scenario:  Create a new repository and initialize with default branch
-    * Protects branch
-    * Creates issue
-1. Scenario:  Create a new repository and don't initialize 
-    * No action; proper webhook response
-1. Scenario:  Edit a repository description 
-    * No action; proper webhook response
-
 ## Installation
 
 ### Deploy the Webhook Listener to Azure Functions
@@ -135,6 +124,10 @@ process.env.AzureFunctionSecretKeyVault = 'my-azure-secret';
 process.env.NameToMentionKeyVault = 'my-user';
 ```
 
+## Monitoring
+
+You can view the logs in the Azure Functions "Monitor" portal
+![image](https://user-images.githubusercontent.com/11546190/155858440-68771a70-dc8f-40d3-824f-4b9fa62a0e2c.png)
 
 
 ## Room for Enhancements
