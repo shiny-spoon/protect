@@ -8,8 +8,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"INFO: no test specified\""
   },
-  "author": "",
+  "author": "Luke Lackrone",
   "license": "ISC"
 }
