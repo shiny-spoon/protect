@@ -11,5 +11,5 @@
     "test": "echo \"INFO: no test specified\""
   },
   "author": "Luke Lackrone",
-  "license": "ISC"
+  "license": "MIT"
 }
