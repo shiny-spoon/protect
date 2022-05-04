@@ -147,3 +147,4 @@ You can view the logs in the Azure Functions "Monitor" portal
 1. [Integrate Key Vault Secrets With Azure Functions](https://daniel-krzyczkowski.github.io/Integrate-Key-Vault-Secrets-With-Azure-Functions/)
 1. [Octokit, Official clients for the GitHub API](https://github.com/octokit)
 1. [GitHub: Managing Branch Protection Rules](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/managing-a-branch-protection-rule)
+1. [Continuous delivery by using GitHub Actions](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-github-actions?tabs=javascript)
