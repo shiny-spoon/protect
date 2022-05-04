@@ -130,7 +130,7 @@ module.exports = async function (context, req) {
             body:
               "@" +
               name_to_mention +
-              "\n\n Attention! Automatically protected repo: " +
+              "\n\n FYI! Automatically protected repo: " +
               webhookpayload.repository.full_name +
               "\n\n All commits must be made to a non-protected branch and submitted via a pull request before they can be merged into the default branch." +
               "\n\n At least one review approval is required before merge to default branch can occur." +
