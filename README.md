@@ -3,7 +3,7 @@
 ## Challenge
 
 * We want to ensure code reviews for code added to our repositories.
-* We want to accomodate this need at scale, as new respositories are created. 
+* We want to accommodate this need at scale, as new repositories are created. 
 
 ## Assumptions
 
@@ -25,8 +25,8 @@
     * Confirming the protection rule(s) applied
 
 ## Limitations of this solution
-* This solution does not accomodate existing repositories. It is built to handle repositories that are newly created, with a default branch.
-* This solution does not accomodate repositories that are not initialized with a default branch.
+* This solution does not accommodate existing repositories. It is built to handle repositories that are newly created, with a default branch.
+* This solution does not accommodate repositories that are not initialized with a default branch.
 
 ## How the solution works
 
@@ -44,7 +44,7 @@ sequenceDiagram
     WebhookListener->>GitHub: Return HTTP Status OK for Webhook
 ```
 
-When a new repository is created in GitHub, GitHub can send a notice of that event to a specfied URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP Listener, or Webhook Listener.
+When a new repository is created in GitHub, GitHub can send a notice of that event to a specified URL. Sending that event is called a Webhook, and the URL we are sending to is called an HTTP Listener, or Webhook Listener.
 
 In this implementation, the Webhook Listener is a Node.js application.
 
